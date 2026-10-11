@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Lua Encoder VIP</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+--bg:#050509;
+--bg2:#0d0d15;
+--bg3:#14141f;
+--border:rgba(255,255,255,.06);
+--text:#eaeaf2;
+--muted:#6b6b85;
+--cyan:#00d4ff;
+--purple:#a855f7;
+--pink:#ec4899;
+--green:#22c55e;
+}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+
+.bg-fx{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:.4;animation:float 20s ease-in-out infinite}
+.orb1{width:500px;height:500px;background:radial-gradient(circle,#00d4ff,transparent 70%);top:-200px;left:-200px}
+.orb2{width:600px;height:600px;background:radial-gradient(circle,#a855f7,transparent 70%);bottom:-250px;right:-250px;animation-delay:-7s}
+.orb3{width:400px;height:400px;background:radial-gradient(circle,#ec4899,transparent 70%);top:50%;left:50%;animation-delay:-14s}
+@keyframes float{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(60px,-40px) scale(1.1)}66%{transform:translate(-40px,60px) scale(.95)}}
+
+.grid-bg{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.4;
+background-image:linear-gradient(rgba(0,212,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,.04) 1px,transparent 1px);
+background-size:60px 60px;
+mask-image:radial-gradient(circle at 50% 50%,#000,transparent 80%);
+-webkit-mask-image:radial-gradient(circle at 50% 50%,#000,transparent 80%)}
+
+.container{max-width:1000px;margin:0 auto;padding:24px 20px;position:relative;z-index:1}
+
+header{text-align:center;padding:20px 0 32px}
+.logo-wrap{position:relative;width:80px;height:80px;margin:0 auto 16px}
+.logo-ring{position:absolute;inset:0;border-radius:22px;background:linear-gradient(135deg,var(--cyan),var(--purple),var(--pink));animation:spin 6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.logo-inner{position:absolute;inset:3px;border-radius:19px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:2rem}
+h1{font-size:1.9rem;font-weight:800;background:linear-gradient(135deg,#00d4ff 0%,#a855f7 50%,#ec4899 100%);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:shine 4s linear infinite;letter-spacing:-.5px;margin-bottom:6px}
+@keyframes shine{to{background-position:200% center}}
+.sub{color:var(--muted);font-size:.85rem}
+.badges{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+.badge{padding:4px 12px;border-radius:100px;font-size:.7rem;font-weight:600;letter-spacing:.3px;display:inline-flex;align-items:center;gap:5px}
+.badge.g{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);color:#4ade80}
+.badge.c{background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.25);color:#22d3ee}
+.badge.p{background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.25);color:#c084fc}
+.badge::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor;box-shadow:0 0 8px currentColor;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;justify-content:center}
+.btn{padding:12px 20px;border:none;border-radius:12px;font-family:inherit;font-size:.85rem;font-weight:700;cursor:pointer;transition:all .25s cubic-bezier(.2,.9,.3,1.2);display:inline-flex;align-items:center;gap:7px;letter-spacing:.3px}
+.btn-primary{background:linear-gradient(135deg,var(--cyan),var(--purple));color:#fff;box-shadow:0 8px 24px rgba(0,212,255,.25);position:relative;overflow:hidden}
+.btn-primary::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent);transition:left .6s}
+.btn-primary:hover:not(:disabled)::before{left:100%}
+.btn-primary:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 14px 32px rgba(0,212,255,.4)}
+.btn-primary:disabled{opacity:.6;cursor:not-allowed}
+.btn-secondary{background:rgba(255,255,255,.04);color:var(--text);border:1px solid var(--border)}
+.btn-secondary:hover{background:rgba(0,212,255,.08);border-color:rgba(0,212,255,.4);transform:translateY(-1px)}
+.btn-danger{background:rgba(239,68,68,.08);color:#f87171;border:1px solid rgba(239,68,68,.2)}
+.btn-danger:hover{background:rgba(239,68,68,.18);transform:translateY(-1px)}
+.btn-success{background:linear-gradient(135deg,var(--green),#16a34a);color:#fff;box-shadow:0 8px 24px rgba(34,197,94,.25)}
+.btn-success:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 14px 32px rgba(34,197,94,.4)}
+.file-input{position:relative;overflow:hidden;display:inline-block}
+.file-input input{position:absolute;inset:0;opacity:0;cursor:pointer}
+
+.editor-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+@media(max-width:768px){.editor-grid{grid-template-columns:1fr}}
+.editor{background:linear-gradient(145deg,rgba(20,20,31,.95),rgba(13,13,21,.98));border:1px solid var(--border);border-radius:16px;overflow:hidden;position:relative;transition:all .3s}
+.editor:hover{border-color:rgba(0,212,255,.2)}
+.editor::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--cyan),var(--purple),transparent);opacity:0;transition:opacity .3s}
+.editor:hover::before{opacity:1}
+.editor-head{padding:14px 18px;background:rgba(0,0,0,.3);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.editor-head .title{font-size:.78rem;font-weight:700;color:var(--cyan);text-transform:uppercase;letter-spacing:1px;display:flex;align-items:center;gap:8px}
+.editor-head .dot{width:8px;height:8px;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px var(--cyan)}
+.editor-head .dot.g{background:var(--green);box-shadow:0 0 8px var(--green)}
+.editor-head .count{font-size:.7rem;color:var(--muted);font-family:Consolas,monospace;padding:3px 8px;background:rgba(0,0,0,.4);border-radius:6px}
+textarea{width:100%;height:340px;background:#06060b;border:none;padding:16px;color:var(--text);font-family:'Consolas','Monaco',monospace;font-size:12.5px;resize:vertical;outline:none;line-height:1.6;tab-size:2}
+textarea::placeholder{color:#3a3a4a}
+textarea:focus{background:#08080f}
+
+.result-box{background:linear-gradient(145deg,rgba(20,20,31,.95),rgba(13,13,21,.98));border:1px solid rgba(34,197,94,.2);border-radius:16px;padding:24px;margin-top:16px;display:none;position:relative;overflow:hidden}
+.result-box.show{display:block;animation:up .5s cubic-bezier(.2,.9,.3,1.2)}
+@keyframes up{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:translateY(0)}}
+.result-box::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--cyan),var(--green),var(--purple));background-size:200% auto;animation:shine 3s linear infinite}
+.result-box h3{color:var(--cyan);font-size:.8rem;margin-bottom:10px;text-transform:uppercase;font-weight:700;letter-spacing:1px;display:flex;align-items:center;gap:8px}
+.result-box h3::before{content:'';width:4px;height:14px;background:linear-gradient(180deg,var(--cyan),var(--purple));border-radius:2px}
+.code-box{background:#06060b;border:1px solid var(--border);border-radius:12px;padding:16px;font-family:'Consolas',monospace;font-size:12px;word-break:break-all;color:#4ade80;max-height:160px;overflow-y:auto;white-space:pre-wrap;line-height:1.6;margin-bottom:10px;position:relative;transition:all .3s}
+.code-box::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--green)}
+.code-box.cyan{color:#22d3ee}
+.code-box.cyan::before{background:var(--cyan)}
+.code-box.purple{color:#c084fc}
+.code-box.purple::before{background:var(--purple)}
+.code-box::-webkit-scrollbar{width:6px}
+.code-box::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:3px}
+.code-box::-webkit-scrollbar-thumb:hover{background:rgba(0,212,255,.3)}
+
+.info{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+.info-item{background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center;transition:all .3s}
+.info-item:hover{border-color:rgba(0,212,255,.3);transform:translateY(-2px)}
+.info-item .val{font-size:1.1rem;font-weight:800;background:linear-gradient(135deg,var(--cyan),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.info-item .lbl{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:4px;font-weight:600}
+
+.status{padding:12px 18px;border-radius:12px;font-size:.84rem;margin-top:14px;display:none;font-weight:600;animation:up .3s ease}
+.status.ok{background:rgba(34,197,94,.1);color:#4ade80;border:1px solid rgba(34,197,94,.25);display:block}
+.status.err{background:rgba(239,68,68,.1);color:#f87171;border:1px solid rgba(239,68,68,.25);display:block}
+.status.info{background:rgba(0,212,255,.1);color:#22d3ee;border:1px solid rgba(0,212,255,.25);display:block}
+
+.spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+.footer{text-align:center;margin-top:30px;font-size:.72rem;color:#3a3a4a;letter-spacing:.5px}
+.footer span{color:var(--cyan);font-weight:600}
+
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:24px}
+@media(max-width:600px){.features{grid-template-columns:1fr}}
+.feat{background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center;transition:all .3s}
+.feat:hover{transform:translateY(-3px);border-color:rgba(0,212,255,.3);background:rgba(0,212,255,.03)}
+.feat .icon{font-size:1.8rem;margin-bottom:8px}
+.feat .name{font-size:.85rem;font-weight:700;color:var(--text);margin-bottom:4px}
+.feat .desc{font-size:.72rem;color:var(--muted);line-height:1.5}
+</style>
+</head>
+<body>
+
+<div class="bg-fx">
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="orb orb3"></div>
+</div>
+<div class="grid-bg"></div>
+
+<div class="container">
+
+<header>
+<div class="logo-wrap">
+<div class="logo-ring"></div>
+<div class="logo-inner">&#128274;</div>
+</div>
+<h1>Lua Encoder VIP</h1>
+<p class="sub">Ma hoa Lua - Luu vinh vien - Bao ve cao cap</p>
+<div class="badges">
+<span class="badge g">Gist Vinh Vien</span>
+<span class="badge c">Delta X Ready</span>
+<span class="badge p">Anti-Crack</span>
+</div>
+</header>
+
+<div class="toolbar">
+<div class="file-input">
+<button class="btn btn-secondary">&#128193; Chon File</button>
+<input type="file" id="fileInput" accept=".lua,.txt" onchange="loadFile(event)">
+</div>
+<button class="btn btn-primary" id="btnEncode" onclick="encode()">&#9889; Encode Lua</button>
+<button class="btn btn-secondary" onclick="copyRaw()">&#128203; Copy Raw</button>
+<button class="btn btn-danger" onclick="clearAll()">&#129529; Xoa Het</button>
+</div>
+
+<div class="editor-grid">
+<div class="editor">
+<div class="editor-head">
+<div class="title"><span class="dot"></span> Code Goc</div>
+<span class="count" id="inputCount">0</span>
+</div>
+<textarea id="inputCode" placeholder="Dan code Lua vao day hoac chon file..." oninput="updateCount()" spellcheck="false"></textarea>
+</div>
+<div class="editor">
+<div class="editor-head">
+<div class="title"><span class="dot g"></span> Loadstring</div>
+<span class="count" id="outputCount">0</span>
+</div>
+<textarea id="outputCode" readonly placeholder="Ket qua se hien o day..." spellcheck="false"></textarea>
+</div>
+</div>
+
+<div class="result-box" id="resultBox">
+<h3>Raw Link (Luu vinh vien tren GitHub Gist)</h3>
+<div class="code-box cyan" id="rawUrl"></div>
+<button class="btn btn-secondary" onclick="copyUrl()">&#128203; Copy Link Raw</button>
+
+<h3 style="margin-top:20px">Loadstring cho Delta X</h3>
+<div class="code-box purple" id="loadstringUrl"></div>
+<button class="btn btn-success" onclick="copyLoadstring()">&#128203; Copy Loadstring</button>
+
+<div class="info">
+<div class="info-item">
+<div class="val" id="origSize">0</div>
+<div class="lbl">Code Goc</div>
+</div>
+<div class="info-item">
+<div class="val" id="encSize">0</div>
+<div class="lbl">Base64</div>
+</div>
+</div>
+</div>
+
+<div class="status" id="status"></div>
+
+<div class="features">
+<div class="feat">
+<div class="icon">&#128274;</div>
+<div class="name">Luu Vinh Vien</div>
+<div class="desc">Script luu tren GitHub Gist, khong bao gio mat</div>
+</div>
+<div class="feat">
+<div class="icon">&#128737;</div>
+<div class="name">Chong Dich Nguoc</div>
+<div class="desc">Base64 + chunk + anti-debug + anti-hook</div>
+</div>
+<div class="feat">
+<div class="icon">&#9889;</div>
+<div class="name">Delta X Ready</div>
+<div class="desc">Loadstring chay truc tiep tren executor</div>
+</div>
+</div>
+
+<div class="footer">ANHKHOA SYSTEM - <span>Lua Encoder VIP v3.0</span></div>
+
+</div>
+
+<script>
+var currentLoadstring = "";
+var currentUrl = "";
+
+function updateCount(){
+    var i = document.getElementById("inputCode").value.length;
+    var o = document.getElementById("outputCode").value.length;
+    document.getElementById("inputCount").textContent = i.toLocaleString() + " ky tu";
+    document.getElementById("outputCount").textContent = o.toLocaleString() + " ky tu";
+}
+
+function loadFile(e){
+    var f = e.target.files[0];
+    if(!f) return;
+    if(f.size > 500000){
+        showStatus("File qua lon (toi da 500KB)", "err");
+        return;
+    }
+    var r = new FileReader();
+    r.onload = function(ev){
+        document.getElementById("inputCode").value = ev.target.result;
+        updateCount();
+        showStatus("Da load: " + f.name + " (" + (f.size/1024).toFixed(1) + " KB)", "info");
+    };
+    r.readAsText(f);
+}
+
+async function encode(){
+    var code = document.getElementById("inputCode").value.trim();
+    if(!code){ showStatus("Nhap code Lua truoc!", "err"); return; }
+
+    var btn = document.getElementById("btnEncode");
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spin"></span> Dang ma hoa...';
+    showStatus("Dang xu ly...", "info");
+
+    try{
+        var res = await fetch("/api/encode", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({code: code})
+        });
+        var data = await res.json();
+        if(data.ok){
+            currentLoadstring = data.loadstring_url;
+            currentUrl = data.raw_url;
+            document.getElementById("outputCode").value = data.loadstring_url;
+            document.getElementById("rawUrl").textContent = data.raw_url;
+            document.getElementById("loadstringUrl").textContent = data.loadstring_url;
+            document.getElementById("origSize").textContent = data.original_size.toLocaleString();
+            document.getElementById("encSize").textContent = data.encoded_size.toLocaleString();
+            document.getElementById("resultBox").classList.add("show");
+            updateCount();
+            showStatus("Ma hoa thanh cong! Link luu vinh vien tren GitHub Gist.", "ok");
+        } else {
+            showStatus("Loi: " + data.error, "err");
+        }
+    } catch(e){
+        showStatus("Loi ket noi: " + e.message, "err");
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '&#9889; Encode Lua';
+    }
+}
+
+function copyLoadstring(){
+    if(!currentLoadstring){ showStatus("Chua co loadstring!", "err"); return; }
+    navigator.clipboard.writeText(currentLoadstring).then(function(){
+        showStatus("Da copy loadstring! Dan vao Delta X de chay.", "ok");
+    });
+}
+
+function copyUrl(){
+    if(!currentUrl){ showStatus("Chua co link raw!", "err"); return; }
+    navigator.clipboard.writeText(currentUrl).then(function(){
+        showStatus("Da copy link raw!", "ok");
+    });
+}
+
+function copyRaw(){
+    var t = document.getElementById("outputCode").value;
+    if(!t){ showStatus("Chua co ket qua!", "err"); return; }
+    navigator.clipboard.writeText(t).then(function(){
+        showStatus("Da copy!", "ok");
+    });
+}
+
+function clearAll(){
+    document.getElementById("inputCode").value = "";
+    document.getElementById("outputCode").value = "";
+    document.getElementById("resultBox").classList.remove("show");
+    updateCount();
+    showStatus("Da xoa het", "info");
+}
+
+function showStatus(msg, type){
+    var s = document.getElementById("status");
+    s.className = "status " + (type || "info");
+    s.textContent = msg;
+    clearTimeout(window._statusTimer);
+    window._statusTimer = setTimeout(function(){ s.className = "status"; }, 4000);
+}
+</script>
+</body>
+</html>
