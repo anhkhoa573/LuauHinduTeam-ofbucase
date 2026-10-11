@@ -3,7 +3,6 @@ import os
 import base64
 import secrets
 import requests
-import hashlib
 from datetime import datetime
 
 app = Flask(__name__)
@@ -59,65 +58,38 @@ def fetch_from_gist(gist_id):
 
 
 def build_lua_loader(encoded):
-    """Tao Lua loader chong dich nguoc manh."""
+    """Tao Lua loader - chay tren Delta X Quoc te."""
     chunks = [encoded[i:i+180] for i in range(0, len(encoded), 180)]
 
     parts = []
-    parts.append("-- ANHKHOA VIP PROTECTION v3.0")
-    parts.append("local _g=getfenv or function() return _ENV end")
-    parts.append("local _e=_g()")
-    parts.append("if _e._LOCK then return end")
-    parts.append("_e._LOCK=true")
-    parts.append("local _t=type")
-    parts.append("local _s=string")
-    parts.append("local _tb=table")
-    parts.append("local _m=math")
-
-    # Anti-debug nhe
-    parts.append("if _e.debug and _e.debug.sethook then")
-    parts.append("  local _c=0")
-    parts.append("  local _old=_e.debug.sethook")
-    parts.append("  _old(function() _c=_c+1 end,'l')")
-    parts.append("  _old()")
-    parts.append("  if _c>3 then return end")
-    parts.append("end")
-
-    # Decoder
+    parts.append("-- ANHKHOA VIP PROTECTION v4.0")
+    parts.append("local _raw={}")
+    for chunk in chunks:
+        parts.append("_raw[#_raw+1]='%s'" % chunk)
+    parts.append("local _data=table.concat(_raw)")
+    parts.append("_raw=nil")
     parts.append("local _b='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'")
     parts.append("local function _d(s)")
-    parts.append("  s=_s.gsub(s,'[^'.._b..'=]','')")
-    parts.append("  return (s:gsub('.',function(x)")
-    parts.append("    if x=='=' then return '' end")
-    parts.append("    local r,f='',(_b:find(x,1,true)-1)")
-    parts.append("    for i=6,1,-1 do r=r..(f%2^i-f%2^(i-1)>0 and '1' or '0') end")
-    parts.append("    return r")
-    parts.append("  end):gsub('%d%d%d?%d?%d?%d?%d?%d?',function(x)")
-    parts.append("    if #x~=8 then return '' end")
-    parts.append("    local c=0")
-    parts.append("    for i=1,8 do c=c+(x:sub(i,i)=='1' and 2^(8-i) or 0) end")
-    parts.append("    return _s.char(c)")
-    parts.append("  end))")
+    parts.append("s=string.gsub(s,'[^'.._b..'=]','')")
+    parts.append("return (s:gsub('.',function(x)")
+    parts.append("if x=='=' then return '' end")
+    parts.append("local r,f='',(_b:find(x,1,true)-1)")
+    parts.append("for i=6,1,-1 do r=r..(f%2^i-f%2^(i-1)>0 and '1' or '0') end")
+    parts.append("return r")
+    parts.append("end):gsub('%d%d%d?%d?%d?%d?%d?%d?',function(x)")
+    parts.append("if #x~=8 then return '' end")
+    parts.append("local c=0")
+    parts.append("for i=1,8 do c=c+(x:sub(i,i)=='1' and 2^(8-i) or 0) end")
+    parts.append("return string.char(c)")
+    parts.append("end))")
     parts.append("end")
-
-    # Ghep chunks
-    parts.append("local _p={")
-    for chunk in chunks:
-        parts.append("'" + chunk + "',")
-    parts.append("}")
-    parts.append("local _raw=_tb.concat(_p)")
-    parts.append("local _code=_d(_raw)")
-
-    # Xoa bien tam
-    parts.append("_p=nil")
-    parts.append("_raw=nil")
+    parts.append("local _code=_d(_data)")
+    parts.append("_data=nil")
     parts.append("_b=nil")
-
-    # Load
-    parts.append("local _f=loadstring or load")
-    parts.append("if not _f then return end")
-    parts.append("local _ok,_err=pcall(_f,_code)")
+    parts.append("local _fn=loadstring or load")
+    parts.append("if not _fn then return end")
+    parts.append("local _ok,_err=pcall(_fn,_code)")
     parts.append("if not _ok then return end")
-    parts.append("_e._LOCK=nil")
 
     return chr(10).join(parts)
 
